@@ -5,29 +5,23 @@ import { MainScene } from "../scenes/MainScene";
 import { Color4 } from "@babylonjs/core/Maths/math.color";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { IrregularGalaxyMaterial } from "./materials/IrregularGalaxyMaterial";
+import {Texture} from "@babylonjs/core";
 
 export class IrregularGalaxy {
+  name: string;
   galaxyMesh: Mesh;
   readonly coreTransformNode: TransformNode;
   private readonly scene: MainScene;
+  private materialForGalaxy: IrregularGalaxyMaterial;
 
-  constructor(scene: MainScene) {
+  constructor(name: string, scene: MainScene) {
+    this.name = name;
     this.scene = scene;
     this.coreTransformNode = new TransformNode("coreTransformNode", this.scene);
   }
 
   init() {
-    const materialForGalaxy = new IrregularGalaxyMaterial("IrregularGalaxyMaterial", this.scene).init();
-
-    const noiseTextureTask = this.scene.assetsManager.addTextureTask(
-      "noiseTextureTask",
-      "./assets/noise/perlinNoise.png",
-      false,
-      false,
-    );
-    noiseTextureTask.onSuccess = task => {
-      materialForGalaxy.setTexture(task.texture);
-    };
+    this.materialForGalaxy = new IrregularGalaxyMaterial("IrregularGalaxyMaterial", this.scene).init();
 
     const meshTaskGalaxy = this.scene.assetsManager.addContainerTask(
       "galaxyTask",
@@ -46,10 +40,10 @@ export class IrregularGalaxy {
       this.galaxyMesh.parent = this.coreTransformNode;
 
       const originalMat = <PBRMaterial>this.galaxyMesh.material;
-      materialForGalaxy.albedoTexture = originalMat.albedoTexture;
+      this.materialForGalaxy.albedoTexture = originalMat.albedoTexture;
       originalMat.albedoTexture.hasAlpha = true;
-      materialForGalaxy.emissiveTexture = originalMat.emissiveTexture;
-      this.galaxyMesh.material = materialForGalaxy;
+      this.materialForGalaxy.emissiveTexture = originalMat.emissiveTexture;
+      this.galaxyMesh.material = this.materialForGalaxy;
 
       for (let i = 0; i < 2; i++) {
         const instanceBranch = this.galaxyMesh.createInstance(`${i}`);
@@ -61,5 +55,9 @@ export class IrregularGalaxy {
     };
 
     return this;
+  }
+
+  setNoiseTexture(texture: Texture) {
+    this.materialForGalaxy.setTexture(texture);
   }
 }

@@ -47,11 +47,8 @@ export class MainScene extends Scene {
     this.camera.lowerRadiusLimit = 800;
     this.camera.upperRadiusLimit = 950;
     this.camera.upperBetaLimit = Math.PI / 3;
-    this.camera.lowerAlphaLimit = Math.PI / 3;
-    this.camera.upperAlphaLimit = Math.PI * 2 / 3;
     this.camera.setTarget(new Vector3(0, 0, 0));
     this.camera.storeState();
-    this.camera.attachControl(this.canvas, false);
 
     CreateEnvironment(this);
 
@@ -62,12 +59,11 @@ export class MainScene extends Scene {
 
       gui.setVisibilityGalaxiesButton(false);
 
+      this.camera.attachControl(this.canvas, false);
       this.camera.setTarget(parentGalaxy.coreTransformNode.position);
       this.camera.alpha = Math.PI / 2;
       this.camera.lowerRadiusLimit = 250;
       this.camera.upperRadiusLimit = 350;
-      this.camera.lowerAlphaLimit = null;
-      this.camera.upperAlphaLimit = null;
     });
 
     gui.onBackObservable.add(() => {
@@ -75,12 +71,10 @@ export class MainScene extends Scene {
 
       gui.setVisibilityGalaxiesButton(true);
 
+      this.camera.detachControl(this.canvas);
       this.camera.restoreState();
       this.camera.lowerRadiusLimit = 800;
       this.camera.upperRadiusLimit = 950;
-      this.camera.upperBetaLimit = Math.PI / 3;
-      this.camera.lowerAlphaLimit = Math.PI / 3;
-      this.camera.upperAlphaLimit = Math.PI * 2 / 3;
       this.camera.setTarget(new Vector3(0, 0, 0));
     });
 

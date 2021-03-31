@@ -105,7 +105,7 @@ export class MainScene extends Scene {
     gui.addSolarLabel("Our solar system", spiralGalaxy.planeSolarSystem, spiralGalaxy.solarSystem, spiralGalaxy.planeTargetSolarSystem);
     coreSpiralGalaxyParticles.emitter = <AbstractMesh>spiralGalaxy.coreTransformNode;
 
-    const ellipticalGalaxy = new EllipticalGalaxy("Spherical Galaxy", this);
+    const ellipticalGalaxy = new EllipticalGalaxy("Elliptical Galaxy", this);
     this.galaxiesArray.push(ellipticalGalaxy);
     gui.addLabel(ellipticalGalaxy.name, ellipticalGalaxy)
     ellipticalGalaxy.coreTransformNode.position.x -= 350;

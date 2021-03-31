@@ -1,23 +1,11 @@
-import GameScene from "./scenes/GameScene";
-import PauseScene from "./scenes/PauseScene";
-import RulesScene from "./scenes/RulesScene";
-import StartScene from "./scenes/StartScene";
-import EndScene from "./scenes/EndScene";
+import { IrregularGalaxy } from "./objects/IrregularGalaxy";
+import { SpiralGalaxy } from "./objects/SpiralGalaxy";
+import { EllipticalGalaxy } from "./objects/EllipticalGalaxy";
 
-export interface InitData {
-  currentScore: number;
-}
-
-export interface Score {
-  pts: number;
-  textObject: Phaser.GameObjects.Text;
-}
-
-type AllScenes = GameScene | PauseScene | RulesScene | StartScene | EndScene;
-
-export interface ToggleAudioConfig {
-  scene: AllScenes;
-  texture: string;
-  frameOn: string;
-  frameOff: string;
+export type Galaxies = EllipticalGalaxy | SpiralGalaxy | IrregularGalaxy;
+export interface GalaxyMaterialConfig {
+  Vertex_Definitions: string
+  Vertex_Before_PositionUpdated: string;
+  Fragment_Definitions: string;
+  Fragment_Before_FragColor: string;
 }

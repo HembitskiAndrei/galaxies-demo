@@ -7,20 +7,27 @@ import { AssetsManager } from "@babylonjs/core/Misc/assetsManager";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import "@babylonjs/core/Helpers/sceneHelpers";
 import { CreateEnvironment } from "../utils/CreateEnvironment";
-import { CreateLensFlare } from "../utils/CreateLensFlare";
 import { IrregularGalaxy } from "../objects/IrregularGalaxy";
 import { SpiralGalaxy } from "../objects/SpiralGalaxy";
-
+import { EllipticalGalaxy } from "../objects/EllipticalGalaxy";
+import { Color4 } from "@babylonjs/core/Maths/math.color";
+import { CoreParticles } from "../objects/particles/coreParticles";
+import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
+import { GUI } from "../objects/gui/GUI";
+import { Galaxies } from "../types";
 
 export class MainScene extends Scene {
   engine: Engine;
   canvas: HTMLCanvasElement;
   assetsManager: AssetsManager;
   camera: ArcRotateCamera;
+  galaxiesArray: Galaxies[];
 
-  constructor(engine: Engine, options?: SceneOptions) {
+  constructor(engine: Engine, canvas: HTMLCanvasElement, options?: SceneOptions) {
     super(engine, options);
     this.engine = engine;
+    this.canvas = canvas;
+
     SceneLoader.OnPluginActivatedObservable.add(function (plugin) {
       if (plugin.name === "gltf" && plugin instanceof GLTFFileLoader) {
         plugin.animationStartMode = GLTFLoaderAnimationStartMode.NONE;
@@ -28,36 +35,101 @@ export class MainScene extends Scene {
         plugin.compileShadowGenerators = false;
       }
     });
-  }
-
-  init(canvas: HTMLCanvasElement) {
-    this.canvas = canvas;
 
     this.assetsManager = new AssetsManager(this);
 
     this.camera = new ArcRotateCamera("Camera", 0, 0, 10, new Vector3(0, 100, 200), this);
     this.camera.minZ = 0.0;
     this.camera.maxZ = 32000;
-    this.camera.lowerRadiusLimit = 250;
-    this.camera.upperRadiusLimit = 500;
+    this.camera.lowerRadiusLimit = 800;
+    this.camera.upperRadiusLimit = 950;
     this.camera.upperBetaLimit = Math.PI / 3;
     this.camera.setTarget(new Vector3(0, 0, 0));
     this.camera.storeState();
-    this.camera.attachControl(this.canvas, false);
 
     CreateEnvironment(this);
 
-    const irregularGalaxy = new IrregularGalaxy(this).init();
-    irregularGalaxy.coreTransformNode.position.x += 500;
+    this.galaxiesArray = [];
 
-    const spiralGalaxy = new SpiralGalaxy(this).init();
+    const gui = new GUI("gui");
+    gui.addBackButton();
+    gui.onPointerUpObservable.add((parentGalaxy: Galaxies) => {
+      const invisibleGalaxies = this.galaxiesArray.filter(galaxy => galaxy.name !== parentGalaxy.name);
+      invisibleGalaxies.forEach(galaxy => galaxy.coreTransformNode.setEnabled(false))
 
-    CreateLensFlare(this, spiralGalaxy.coreTransformNode);
+      gui.setVisibilityGalaxiesButton(false);
 
+      this.camera.attachControl(this.canvas, false);
+      this.camera.setTarget(parentGalaxy.coreTransformNode.position);
+      this.camera.alpha = Math.PI / 2;
+      this.camera.lowerRadiusLimit = 250;
+      this.camera.upperRadiusLimit = 350;
+    });
+
+    gui.onBackObservable.add(() => {
+      this.galaxiesArray.forEach(galaxy => galaxy.coreTransformNode.setEnabled(true))
+
+      gui.setVisibilityGalaxiesButton(true);
+
+      this.camera.detachControl(this.canvas);
+      this.camera.restoreState();
+      this.camera.lowerRadiusLimit = 800;
+      this.camera.upperRadiusLimit = 950;
+    });
+
+    const coreSpiralGalaxyParticles = new CoreParticles("coreSpiralGalaxyParticles", 1, this, new Color4(0.9,0.9,0.9,0.9));
+    coreSpiralGalaxyParticles.start();
+
+    const coreEllipticalGalaxyParticles = new CoreParticles("coreEllipticalGalaxyParticles", 1, this, new Color4(0.5,0.5,0.5,0.5));
+    coreEllipticalGalaxyParticles.start();
+
+    const lensFlareTextureTask = this.assetsManager.addTextureTask(
+      "lensFlareTextureTask",
+      "./assets/textures/lensFlare.png",
+      false,
+      false,
+    );
+    lensFlareTextureTask.onSuccess = task => {
+      coreSpiralGalaxyParticles.setTexture(task.texture);
+      coreEllipticalGalaxyParticles.setTexture(task.texture);
+    };
+
+    const irregularGalaxy = new IrregularGalaxy("Irregular Galaxy", this);
+    this.galaxiesArray.push(irregularGalaxy);
+    irregularGalaxy.coreTransformNode.position.x += 350;
+    gui.addLabel(irregularGalaxy.name, irregularGalaxy)
+
+    const spiralGalaxy = new SpiralGalaxy("Spiral Galaxy", this);
+    this.galaxiesArray.push(spiralGalaxy);
+    gui.addLabel(spiralGalaxy.name, spiralGalaxy)
+    gui.addSolarLabel("Our solar system", spiralGalaxy.planeSolarSystem, spiralGalaxy.solarSystem, spiralGalaxy.planeTargetSolarSystem);
+    coreSpiralGalaxyParticles.emitter = <AbstractMesh>spiralGalaxy.coreTransformNode;
+
+    const ellipticalGalaxy = new EllipticalGalaxy("Spherical Galaxy", this);
+    this.galaxiesArray.push(ellipticalGalaxy);
+    gui.addLabel(ellipticalGalaxy.name, ellipticalGalaxy)
+    ellipticalGalaxy.coreTransformNode.position.x -= 350;
+    coreEllipticalGalaxyParticles.emitter = <AbstractMesh>ellipticalGalaxy.coreTransformNode;
+
+    const noiseTextureTask = this.assetsManager.addTextureTask(
+      "noiseTextureTask",
+      "./assets/noise/perlinNoise.png",
+      false,
+      false,
+    );
+    noiseTextureTask.onSuccess = task => {
+      irregularGalaxy.setNoiseTexture(task.texture);
+      spiralGalaxy.setNoiseTexture(task.texture);
+      ellipticalGalaxy.setNoiseTexture(task.texture);
+    };
+
+    const rotateSpeedIrregularGalaxy = 0.000175;
+    const rotateSpeedSpiralGalaxy = 0.00045;
     this.assetsManager.onFinish = () => {
+      gui.addArmLabel("Local Arm", spiralGalaxy.coreTransformNode, spiralGalaxy.localArm);
       this.registerBeforeRender(() => {
-        irregularGalaxy.coreTransformNode.addRotation(0, -(0.000175 * this.getAnimationRatio()), 0);
-        spiralGalaxy.coreTransformNode.addRotation(0, 0.00045 * this.getAnimationRatio(), 0);
+        irregularGalaxy.coreTransformNode.addRotation(0, -(rotateSpeedIrregularGalaxy * this.getAnimationRatio()), 0);
+        spiralGalaxy.coreTransformNode.addRotation(0, rotateSpeedSpiralGalaxy * this.getAnimationRatio(), 0);
       });
     };
 

@@ -4,11 +4,8 @@ import { Color4 } from "@babylonjs/core/Maths/math.color";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 
 export class CoreParticles extends ParticleSystem{
-  constructor(name: string, capacity: number, sceneOrEngine: MainScene) {
+  constructor(name: string, capacity: number, sceneOrEngine: MainScene, color: Color4) {
     super(name, capacity, sceneOrEngine);
-  }
-
-  init(color: Color4) {
 
     this.emitter = Vector3.Zero();
 
@@ -28,8 +25,6 @@ export class CoreParticles extends ParticleSystem{
     this.maxEmitPower = 0;
 
     this.emitRate = 1;
-
-    return this;
   }
 
   setTexture(texture: Texture) {

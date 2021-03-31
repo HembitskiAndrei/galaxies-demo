@@ -4,24 +4,23 @@ import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
 import { MainScene } from "../scenes/MainScene";
 import { Color4 } from "@babylonjs/core/Maths/math.color";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
-import { IrregularGalaxyMaterial } from "./materials/IrregularGalaxyMaterial";
-import {Texture} from "@babylonjs/core";
+import { Texture } from "@babylonjs/core/Materials/Textures/texture";
+import { GalaxyMaterial } from "./materials/GalaxyMaterial";
+import { CONFIG_IRREGULAR_GALAXY_MATERIAL } from "./materials/configsGalaxiesMaterial";
 
 export class IrregularGalaxy {
   name: string;
   galaxyMesh: Mesh;
   readonly coreTransformNode: TransformNode;
   private readonly scene: MainScene;
-  private materialForGalaxy: IrregularGalaxyMaterial;
+  private readonly materialForGalaxy: GalaxyMaterial;
 
   constructor(name: string, scene: MainScene) {
     this.name = name;
     this.scene = scene;
     this.coreTransformNode = new TransformNode("coreTransformNode", this.scene);
-  }
 
-  init() {
-    this.materialForGalaxy = new IrregularGalaxyMaterial("IrregularGalaxyMaterial", this.scene).init();
+    this.materialForGalaxy = new GalaxyMaterial("IrregularGalaxyMaterial", this.scene, CONFIG_IRREGULAR_GALAXY_MATERIAL);
 
     const meshTaskGalaxy = this.scene.assetsManager.addContainerTask(
       "galaxyTask",
@@ -34,9 +33,6 @@ export class IrregularGalaxy {
       this.galaxyMesh.registerInstancedBuffer("color", 4);
       this.galaxyMesh.instancedBuffers.color = new Color4(1, 1, 1, 1);
       this.galaxyMesh.hasVertexAlpha = true;
-      // this.galaxyMesh = <Mesh>(
-      //   task.loadedContainer.instantiateModelsToScene(name => `${name}-1`, false).rootNodes[0].getChildMeshes()[0]
-      // );
       this.galaxyMesh.parent = this.coreTransformNode;
 
       const originalMat = <PBRMaterial>this.galaxyMesh.material;
@@ -53,8 +49,6 @@ export class IrregularGalaxy {
         instanceBranch.instancedBuffers.color = new Color4(1, 1, 1, 1 - i * 0.85);
       }
     };
-
-    return this;
   }
 
   setNoiseTexture(texture: Texture) {

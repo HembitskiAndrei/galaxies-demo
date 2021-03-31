@@ -1,34 +1,50 @@
-import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
-import { MainScene } from "../scenes/MainScene";
-import { SpiralGalaxyMaterial } from "./materials/SpiralGalaxyMaterial";
-import {Texture} from "@babylonjs/core";
+import {TransformNode} from "@babylonjs/core/Meshes/transformNode";
+import {Mesh} from "@babylonjs/core/Meshes/mesh";
+import {MeshBuilder} from "@babylonjs/core/Meshes/meshBuilder";
+import {Vector3} from "@babylonjs/core/Maths/math.vector";
+import {PBRMaterial} from "@babylonjs/core/Materials/PBR/pbrMaterial";
+import {MainScene} from "../scenes/MainScene";
+import {Texture} from "@babylonjs/core/Materials/Textures/texture";
+import {GalaxyMaterial} from "./materials/GalaxyMaterial";
+import {CONFIG_SPIRAL_GALAXY_MATERIAL} from "./materials/configsGalaxiesMaterial";
+import {AbstractMesh} from "@babylonjs/core/Meshes/abstractMesh";
 
 export class SpiralGalaxy {
   name: string;
-  galaxyMesh1: Mesh;
-  galaxyMesh2: Mesh;
-  galaxyMesh3: Mesh;
-  galaxyMesh4: Mesh;
   readonly coreTransformNode: TransformNode;
+  readonly solarSystem: TransformNode;
+  localArm: AbstractMesh;
+  readonly planeSolarSystem: Mesh;
+  readonly planeTargetSolarSystem: Mesh;
   private readonly scene: MainScene;
-  private materialForGalaxy1: SpiralGalaxyMaterial;
-  private materialForGalaxy2: SpiralGalaxyMaterial;
-  private materialForGalaxy3: SpiralGalaxyMaterial;
-  private materialForGalaxy4: SpiralGalaxyMaterial;
+  private readonly materialsForGalaxy: GalaxyMaterial[];
 
   constructor(name: string, scene: MainScene) {
     this.name = name;
     this.scene = scene;
     this.coreTransformNode = new TransformNode("coreTransformNode", this.scene);
-  }
+    this.coreTransformNode.addRotation(0, -Math.PI / 4, 0);
 
-  init() {
-    this.materialForGalaxy1 = new SpiralGalaxyMaterial("SpiralGalaxyMaterial", this.scene).init();
-    this.materialForGalaxy2 = new SpiralGalaxyMaterial("SpiralGalaxyMaterial", this.scene).init();
-    this.materialForGalaxy3 = new SpiralGalaxyMaterial("SpiralGalaxyMaterial", this.scene).init();
-    this.materialForGalaxy4 = new SpiralGalaxyMaterial("SpiralGalaxyMaterial", this.scene).init();
+    this.materialsForGalaxy = [];
+    for(let i = 0; i < 4; i++) {
+      this.materialsForGalaxy.push(new GalaxyMaterial(`SpiralGalaxyMaterial-${i}`, this.scene, CONFIG_SPIRAL_GALAXY_MATERIAL));
+    }
+
+    this.solarSystem = new TransformNode("node", this.scene);
+    this.solarSystem.position = new Vector3(-35, 0, 30);
+    this.solarSystem.parent = this.coreTransformNode;
+
+    this.planeSolarSystem = MeshBuilder.CreatePlane("planeLabel", { width: 80, height: 40 }, this.scene);
+    this.planeSolarSystem.renderingGroupId = 2;
+    this.planeSolarSystem.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    this.planeSolarSystem.position = new Vector3(-70, 40, 20);
+    this.planeSolarSystem.parent = this.coreTransformNode;
+
+    this.planeTargetSolarSystem = Mesh.CreatePlane("planeTargetSolarSystem", 4, this.scene);
+    this.planeTargetSolarSystem.renderingGroupId = 2;
+    this.planeTargetSolarSystem.position = new Vector3(0, 0, 0);
+    this.planeTargetSolarSystem.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    this.planeTargetSolarSystem.parent = this.solarSystem;
 
     const meshTaskGalaxy = this.scene.assetsManager.addContainerTask(
       "galaxyTask",
@@ -38,55 +54,27 @@ export class SpiralGalaxy {
     );
     meshTaskGalaxy.onSuccess = task => {
       const deltaY = 0;
-
-      this.galaxyMesh1 = <Mesh>task.loadedContainer.meshes[4];
-      const originalMat1 = <PBRMaterial>this.galaxyMesh1.material;
-      this.materialForGalaxy1.albedoTexture = originalMat1.albedoTexture;
-      originalMat1.albedoTexture.hasAlpha = true;
-      this.materialForGalaxy1.emissiveTexture = originalMat1.emissiveTexture;
-      this.galaxyMesh1.material = this.materialForGalaxy1;
-      const instanceBranch1 = this.galaxyMesh1.createInstance("1");
-      instanceBranch1.position.y += deltaY;
-      instanceBranch1.parent = this.coreTransformNode;
-
-      this.galaxyMesh2 = <Mesh>task.loadedContainer.meshes[2];
-      const originalMat2 = <PBRMaterial>this.galaxyMesh2.material;
-      this.materialForGalaxy2.albedoTexture = originalMat2.albedoTexture;
-      originalMat2.albedoTexture.hasAlpha = true;
-      this.materialForGalaxy2.emissiveTexture = originalMat2.emissiveTexture;
-      this.galaxyMesh2.material = this.materialForGalaxy2;
-      const instanceBranch2 = this.galaxyMesh2.createInstance("2");
-      instanceBranch2.position.y += deltaY;
-      instanceBranch2.parent = this.coreTransformNode;
-
-      this.galaxyMesh3 = <Mesh>task.loadedContainer.meshes[1];
-      const originalMat3 = <PBRMaterial>this.galaxyMesh3.material;
-      this.materialForGalaxy3.albedoTexture = originalMat3.albedoTexture;
-      originalMat3.albedoTexture.hasAlpha = true;
-      this.materialForGalaxy3.emissiveTexture = originalMat3.emissiveTexture;
-      this.galaxyMesh3.material = this.materialForGalaxy3;
-      const instanceBranch3 = this.galaxyMesh3.createInstance("3");
-      instanceBranch3.position.y += deltaY;
-      instanceBranch3.parent = this.coreTransformNode;
-
-      this.galaxyMesh4 = <Mesh>task.loadedContainer.meshes[3];
-      const originalMat4 = <PBRMaterial>this.galaxyMesh4.material;
-      this.materialForGalaxy4.albedoTexture = originalMat4.albedoTexture;
-      originalMat4.albedoTexture.hasAlpha = true;
-      this.materialForGalaxy4.emissiveTexture = originalMat4.emissiveTexture;
-      this.galaxyMesh4.material = this.materialForGalaxy4;
-      const instanceBranch4 = this.galaxyMesh4.createInstance("4");
-      instanceBranch4.position.y += deltaY;
-      instanceBranch4.parent = this.coreTransformNode;
+      const meshes = task.loadedContainer.instantiateModelsToScene(name => `${name}-1`, false).rootNodes[0].getChildMeshes();
+      for(let i = 1; i < 5; i++) {
+        const galaxyMesh = meshes[i];
+        galaxyMesh.position.y += deltaY;
+        const originalMat = <PBRMaterial>galaxyMesh.material;
+        const customMaterial =  this.materialsForGalaxy[i - 1];
+        customMaterial.albedoTexture = originalMat.albedoTexture;
+        customMaterial.emissiveTexture = originalMat.emissiveTexture;
+        galaxyMesh.material = customMaterial;
+        galaxyMesh.parent = this.coreTransformNode;
+      }
+      this.localArm = meshes[0];
+      this.localArm.renderingGroupId = 2;
+      this.localArm.parent = this.coreTransformNode;
+      this.localArm.position.y += deltaY;
     };
-
-    return this;
   }
 
   setNoiseTexture(texture: Texture) {
-    this.materialForGalaxy1.setTexture(texture);
-    this.materialForGalaxy2.setTexture(texture);
-    this.materialForGalaxy3.setTexture(texture);
-    this.materialForGalaxy4.setTexture(texture);
+    this.materialsForGalaxy.forEach(material => {
+      material.setTexture(texture);
+    })
   }
 }

@@ -9,10 +9,7 @@ window.addEventListener("DOMContentLoaded", function () {
     const canvas = CreateCanvas();
     const engine = new Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true }, true);
 
-    const mainScene = new MainScene(engine).init(canvas);
-    // Engine.audioEngine.useCustomUnlockedButton = true;
-    // let loadingScreen = new CustomLoadingScreen();
-    // engine.loadingScreen = loadingScreen;
+    const mainScene = new MainScene(engine, canvas);
 
     // DracoCompression.Configuration = {
     //   decoder: {
@@ -27,14 +24,7 @@ window.addEventListener("DOMContentLoaded", function () {
     //       "/src/draco/draco_decoder_gltf.js",
     //   },
     // };
-    // GLTFFileLoader.IncrementalLoading = false;
-    // SceneLoader.OnPluginActivatedObservable.add(plugin=>{
-    //     if (plugin.name === "gltf" && plugin instanceof GLTFFileLoader) {
-    //         //plugin.RegisterExtension();
-    //         //plugin.compileMaterials = false;
-    //         plugin.coordinateSystemMode = GLTFLoaderCoordinateSystemMode.FORCE_RIGHT_HANDED;
-    //     }
-    // });
+
   } else {
     window.alert("Browser not supported");
   }

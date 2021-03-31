@@ -2,8 +2,12 @@ import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture
 import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle";
 import { Control } from "@babylonjs/gui/2D/controls/control";
 import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
+import { Ellipse } from "@babylonjs/gui/2D/controls/ellipse";
+import { MultiLine } from "@babylonjs/gui/2D/controls/multiLine";
 import { Observable } from "@babylonjs/core/Misc/observable";
 import { Galaxies } from "../../types";
+import { Mesh } from "@babylonjs/core/Meshes/mesh";
+import {AbstractMesh, TransformNode} from "@babylonjs/core";
 
 export class GUI {
   advancedTexture: AdvancedDynamicTexture;
@@ -18,8 +22,6 @@ export class GUI {
     this.onBackObservable = new Observable();
     this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI(name);
     this.advancedTexture.idealWidth = 1024;
-
-    this.addBackButton();
   }
 
   setVisibilityGalaxiesButton(value: boolean) {
@@ -36,7 +38,7 @@ export class GUI {
   addLabel(text: string, galaxy: Galaxies) {
     const rect1 = new Rectangle();
     this.galaxiesButton.push(rect1)
-    rect1.width = 0.175;
+    rect1.width = 0.2;
     rect1.height = "35px";
     rect1.cornerRadius = 10;
     rect1.color = "#878787";
@@ -68,8 +70,68 @@ export class GUI {
     const label = new TextBlock();
     label.text = text;
     label.color = "#ffffff";
-    label.fontSize = 20;
+    label.fontSize = 19;
     rect1.addControl(label);
+  }
+
+  addArmLabel(text: string, node: TransformNode, labelLocalArm: AbstractMesh) {
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(labelLocalArm, 1024, 256);
+
+    const rect1 = new Rectangle();
+    rect1.width = 1.0;
+    rect1.height = 1.0;
+    rect1.cornerRadius = 40;
+    rect1.color = "#454545";
+    rect1.thickness = 20;
+    rect1.background = "#ffffff55";
+    advancedTexture.addControl(rect1);
+    rect1.linkWithMesh(node);
+    rect1.linkOffsetY = -100;
+
+    const label = new TextBlock();
+    label.text = text;
+    label.color = "#000000";
+    label.fontSize = 150;
+    rect1.addControl(label);
+  }
+
+  addSolarLabel(text: string, sun: Mesh, node: TransformNode, targetPlane: Mesh) {
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(sun, 1024, 512);
+
+    const rect1 = new Rectangle();
+    rect1.width = 1.0;
+    rect1.height = 0.5;
+    rect1.cornerRadius = 40;
+    rect1.color = "#ffffff";
+    rect1.thickness = 20;
+    rect1.background = "#454545";
+    advancedTexture.addControl(rect1);
+    rect1.linkWithMesh(sun);
+    rect1.linkOffsetY = -100;
+
+    const label = new TextBlock();
+    label.text = text;
+    label.color = "#ffffff";
+    label.fontSize = 100;
+    rect1.addControl(label);
+
+    const targetAdvancedTexture = AdvancedDynamicTexture.CreateForMesh(targetPlane);
+    const target = new Ellipse();
+    target.width = 1.0;
+    target.height = 1.0;
+    target.color = "#454545";
+    target.thickness = 100;
+    target.background = "#ffffff";
+    targetAdvancedTexture.addControl(target);
+    target.linkWithMesh(node);
+
+    const line = new MultiLine();
+    line.color = "#7b7b7b";
+    line.lineWidth = 3;
+    line.add(sun);
+    line.add(targetPlane);
+
+    this.advancedTexture.addControl(line);
   }
 
   addBackButton() {

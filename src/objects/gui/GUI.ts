@@ -184,6 +184,5 @@ export class GUI {
     rectback.addControl(label);
 
     this.backButton = rectback;
-    this.backButton.isVisible = false;
   }
 }

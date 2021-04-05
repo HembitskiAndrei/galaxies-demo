@@ -4,10 +4,10 @@ import { Material } from "@babylonjs/core/Materials/material";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { MainScene } from "../../scenes/MainScene";
 import { Texture } from "@babylonjs/core";
-import { GalaxyMaterialConfig } from "../../types";
+import { IGalaxyMaterialConfig } from "../../types";
 
 export class GalaxyMaterial extends PBRCustomMaterial {
-  constructor(name: string, scene: MainScene, config: GalaxyMaterialConfig) {
+  constructor(name: string, scene: MainScene, config: IGalaxyMaterialConfig) {
     super(name, scene);
     this.backFaceCulling = false;
     this.alphaMode = Engine.ALPHA_ADD;

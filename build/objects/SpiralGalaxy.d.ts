@@ -13,5 +13,5 @@ export declare class SpiralGalaxy {
     private readonly scene;
     private readonly materialsForGalaxy;
     constructor(name: string, scene: MainScene);
-    setNoiseTexture(texture: Texture): void;
+    SetNoiseTexture(texture: Texture): void;
 }

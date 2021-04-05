@@ -8,6 +8,7 @@ import {Texture} from "@babylonjs/core/Materials/Textures/texture";
 import {GalaxyMaterial} from "./materials/GalaxyMaterial";
 import {CONFIG_SPIRAL_GALAXY_MATERIAL} from "./materials/configsGalaxiesMaterial";
 import {AbstractMesh} from "@babylonjs/core/Meshes/abstractMesh";
+import {UtilityLayerRenderer} from "@babylonjs/core/";
 
 export class SpiralGalaxy {
   name: string;
@@ -34,13 +35,14 @@ export class SpiralGalaxy {
     this.solarSystem.position = new Vector3(-35, 0, 30);
     this.solarSystem.parent = this.coreTransformNode;
 
-    this.planeSolarSystem = MeshBuilder.CreatePlane("planeLabel", { width: 80, height: 40 }, this.scene);
+    const utilLayer = new UtilityLayerRenderer(this.scene, false);
+    this.planeSolarSystem = MeshBuilder.CreatePlane("planeLabel", { width: 80, height: 40 }, utilLayer.utilityLayerScene);
     this.planeSolarSystem.renderingGroupId = 2;
     this.planeSolarSystem.billboardMode = Mesh.BILLBOARDMODE_ALL;
-    this.planeSolarSystem.position = new Vector3(-70, 40, 20);
-    this.planeSolarSystem.parent = this.coreTransformNode;
+    this.planeSolarSystem.position = new Vector3(-80, -20, 40);
+    this.planeSolarSystem.parent = this.solarSystem;
 
-    this.planeTargetSolarSystem = Mesh.CreatePlane("planeTargetSolarSystem", 4, this.scene);
+    this.planeTargetSolarSystem = Mesh.CreatePlane("planeTargetSolarSystem", 4, utilLayer.utilityLayerScene);
     this.planeTargetSolarSystem.renderingGroupId = 2;
     this.planeTargetSolarSystem.position = new Vector3(0, 0, 0);
     this.planeTargetSolarSystem.billboardMode = Mesh.BILLBOARDMODE_ALL;
@@ -72,7 +74,7 @@ export class SpiralGalaxy {
     };
   }
 
-  setNoiseTexture(texture: Texture) {
+  SetNoiseTexture(texture: Texture) {
     this.materialsForGalaxy.forEach(material => {
       material.setTexture(texture);
     })

@@ -6,8 +6,9 @@ import { Ellipse } from "@babylonjs/gui/2D/controls/ellipse";
 import { MultiLine } from "@babylonjs/gui/2D/controls/multiLine";
 import { Observable } from "@babylonjs/core/Misc/observable";
 import { Galaxies } from "../../types";
-import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import {AbstractMesh, TransformNode} from "@babylonjs/core";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+import { ISolarLabelsConfig } from "../../types";
+import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 
 export class GUI {
   advancedTexture: AdvancedDynamicTexture;
@@ -15,6 +16,9 @@ export class GUI {
   onBackObservable: any;
   galaxiesButton: Rectangle[];
   backButton: Rectangle;
+  lineToLabel: MultiLine;
+  solarSystemNode: TransformNode;
+  localArmPlane: AbstractMesh;
 
   constructor(name: string) {
     this.galaxiesButton = [];
@@ -24,18 +28,18 @@ export class GUI {
     this.advancedTexture.idealWidth = 1024;
   }
 
-  setVisibilityGalaxiesButton(value: boolean) {
+  SetVisibilityGalaxiesButton(value: boolean) {
     this.galaxiesButton.forEach(button => {
       button.isVisible = value;
     })
-    this.setVisibilityBackButton(!value);
+    this.SetVisibilityBackButton(!value);
   }
 
-  setVisibilityBackButton(value: boolean) {
+  SetVisibilityBackButton(value: boolean) {
     this.backButton.isVisible = value;
   }
 
-  addLabel(text: string, galaxy: Galaxies) {
+  AddLabel(text: string, galaxy: Galaxies) {
     const rect1 = new Rectangle();
     this.galaxiesButton.push(rect1)
     rect1.width = 0.2;
@@ -74,29 +78,10 @@ export class GUI {
     rect1.addControl(label);
   }
 
-  addArmLabel(text: string, node: TransformNode, labelLocalArm: AbstractMesh) {
-    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(labelLocalArm, 1024, 256);
-
-    const rect1 = new Rectangle();
-    rect1.width = 1.0;
-    rect1.height = 1.0;
-    rect1.cornerRadius = 40;
-    rect1.color = "#454545";
-    rect1.thickness = 20;
-    rect1.background = "#ffffff55";
-    advancedTexture.addControl(rect1);
-    rect1.linkWithMesh(node);
-    rect1.linkOffsetY = -100;
-
-    const label = new TextBlock();
-    label.text = text;
-    label.color = "#000000";
-    label.fontSize = 150;
-    rect1.addControl(label);
-  }
-
-  addSolarLabel(text: string, sun: Mesh, node: TransformNode, targetPlane: Mesh) {
-    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(sun, 1024, 512);
+  AddSolarLabel(config: ISolarLabelsConfig) {
+    this.solarSystemNode = config.solarSystem;
+    this.localArmPlane = config.planeArmLabel;
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(config.planeSolarLabel, 1024, 512);
 
     const rect1 = new Rectangle();
     rect1.width = 1.0;
@@ -106,16 +91,16 @@ export class GUI {
     rect1.thickness = 20;
     rect1.background = "#454545";
     advancedTexture.addControl(rect1);
-    rect1.linkWithMesh(sun);
+    rect1.linkWithMesh(config.planeSolarLabel);
     rect1.linkOffsetY = -100;
 
     const label = new TextBlock();
-    label.text = text;
+    label.text = config.textSolarLabel;
     label.color = "#ffffff";
     label.fontSize = 100;
     rect1.addControl(label);
 
-    const targetAdvancedTexture = AdvancedDynamicTexture.CreateForMesh(targetPlane);
+    const targetAdvancedTexture = AdvancedDynamicTexture.CreateForMesh(config.planeTargetSolarSystem);
     const target = new Ellipse();
     target.width = 1.0;
     target.height = 1.0;
@@ -123,18 +108,43 @@ export class GUI {
     target.thickness = 100;
     target.background = "#ffffff";
     targetAdvancedTexture.addControl(target);
-    target.linkWithMesh(node);
+    target.linkWithMesh(config.solarSystem);
 
-    const line = new MultiLine();
-    line.color = "#7b7b7b";
-    line.lineWidth = 3;
-    line.add(sun);
-    line.add(targetPlane);
+    this.lineToLabel = new MultiLine();
+    this.lineToLabel.color = "#ffffff";
+    this.lineToLabel.lineWidth = 4;
+    this.lineToLabel.add(config.planeSolarLabel);
+    this.lineToLabel.add(config.planeTargetSolarSystem);
 
-    this.advancedTexture.addControl(line);
+    this.advancedTexture.addControl(this.lineToLabel);
+
+    const advancedTextureArm = AdvancedDynamicTexture.CreateForMesh(config.planeArmLabel, 1024, 256);
+
+    const rectArm = new Rectangle();
+    rectArm.width = 1.0;
+    rectArm.height = 1.0;
+    rectArm.cornerRadius = 40;
+    rectArm.color = "#454545";
+    rectArm.thickness = 20;
+    rectArm.background = "#ffffff55";
+    advancedTextureArm.addControl(rectArm);
+    rectArm.linkWithMesh(config.solarSystem);
+    rectArm.linkOffsetY = -100;
+
+    const labelArm = new TextBlock();
+    labelArm.text = config.textArmLabel;
+    labelArm.color = "#000000";
+    labelArm.fontSize = 150;
+    rectArm.addControl(labelArm);
   }
 
-  addBackButton() {
+  SetSolarLabelsVisibility(value: boolean) {
+    this.lineToLabel.isVisible = value;
+    this.solarSystemNode.setEnabled(value);
+    this.localArmPlane.setEnabled(value);
+  }
+
+  AddBackButton() {
     const rectback = new Rectangle();
     rectback.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_RIGHT;
     rectback.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;

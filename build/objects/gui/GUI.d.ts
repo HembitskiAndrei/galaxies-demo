@@ -1,19 +1,24 @@
 import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
 import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle";
+import { MultiLine } from "@babylonjs/gui/2D/controls/multiLine";
 import { Galaxies } from "../../types";
-import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { AbstractMesh, TransformNode } from "@babylonjs/core";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+import { ISolarLabelsConfig } from "../../types";
+import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 export declare class GUI {
     advancedTexture: AdvancedDynamicTexture;
     onPointerUpObservable: any;
     onBackObservable: any;
     galaxiesButton: Rectangle[];
     backButton: Rectangle;
+    lineToLabel: MultiLine;
+    solarSystemNode: TransformNode;
+    localArmPlane: AbstractMesh;
     constructor(name: string);
-    setVisibilityGalaxiesButton(value: boolean): void;
-    setVisibilityBackButton(value: boolean): void;
-    addLabel(text: string, galaxy: Galaxies): void;
-    addArmLabel(text: string, node: TransformNode, labelLocalArm: AbstractMesh): void;
-    addSolarLabel(text: string, sun: Mesh, node: TransformNode, targetPlane: Mesh): void;
-    addBackButton(): void;
+    SetVisibilityGalaxiesButton(value: boolean): void;
+    SetVisibilityBackButton(value: boolean): void;
+    AddLabel(text: string, galaxy: Galaxies): void;
+    AddSolarLabel(config: ISolarLabelsConfig): void;
+    SetSolarLabelsVisibility(value: boolean): void;
+    AddBackButton(): void;
 }

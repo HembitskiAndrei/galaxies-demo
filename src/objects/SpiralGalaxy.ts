@@ -13,10 +13,10 @@ import {UtilityLayerRenderer} from "@babylonjs/core/";
 export class SpiralGalaxy {
   name: string;
   readonly coreTransformNode: TransformNode;
-  readonly solarSystem: TransformNode;
-  localArm: AbstractMesh;
-  readonly planeSolarSystem: Mesh;
-  readonly planeTargetSolarSystem: Mesh;
+  solarSystem: TransformNode;
+  planeLocalArm: AbstractMesh;
+  planeSolarSystem: Mesh;
+  planeTargetSolarSystem: Mesh;
   private readonly scene: MainScene;
   private readonly materialsForGalaxy: GalaxyMaterial[];
 
@@ -26,27 +26,12 @@ export class SpiralGalaxy {
     this.coreTransformNode = new TransformNode("coreTransformNode", this.scene);
     this.coreTransformNode.addRotation(0, -Math.PI / 4, 0);
 
+    this.AddMeshesForGUI();
+
     this.materialsForGalaxy = [];
     for(let i = 0; i < 4; i++) {
       this.materialsForGalaxy.push(new GalaxyMaterial(`SpiralGalaxyMaterial-${i}`, this.scene, CONFIG_SPIRAL_GALAXY_MATERIAL));
     }
-
-    this.solarSystem = new TransformNode("node", this.scene);
-    this.solarSystem.position = new Vector3(-35, 0, 30);
-    this.solarSystem.parent = this.coreTransformNode;
-
-    const utilLayer = new UtilityLayerRenderer(this.scene, false);
-    this.planeSolarSystem = MeshBuilder.CreatePlane("planeLabel", { width: 80, height: 40 }, utilLayer.utilityLayerScene);
-    this.planeSolarSystem.renderingGroupId = 2;
-    this.planeSolarSystem.billboardMode = Mesh.BILLBOARDMODE_ALL;
-    this.planeSolarSystem.position = new Vector3(-80, -20, 40);
-    this.planeSolarSystem.parent = this.solarSystem;
-
-    this.planeTargetSolarSystem = Mesh.CreatePlane("planeTargetSolarSystem", 4, utilLayer.utilityLayerScene);
-    this.planeTargetSolarSystem.renderingGroupId = 2;
-    this.planeTargetSolarSystem.position = new Vector3(0, 0, 0);
-    this.planeTargetSolarSystem.billboardMode = Mesh.BILLBOARDMODE_ALL;
-    this.planeTargetSolarSystem.parent = this.solarSystem;
 
     const meshTaskGalaxy = this.scene.assetsManager.addContainerTask(
       "galaxyTask",
@@ -67,11 +52,30 @@ export class SpiralGalaxy {
         galaxyMesh.material = customMaterial;
         galaxyMesh.parent = this.coreTransformNode;
       }
-      this.localArm = meshes[0];
-      this.localArm.renderingGroupId = 2;
-      this.localArm.parent = this.coreTransformNode;
-      this.localArm.position.y += deltaY;
+      this.planeLocalArm = meshes[0];
+      this.planeLocalArm.renderingGroupId = 2;
+      this.planeLocalArm.parent = this.coreTransformNode;
+      this.planeLocalArm.position.y += deltaY;
     };
+  }
+
+  AddMeshesForGUI() {
+    this.solarSystem = new TransformNode("node", this.scene);
+    this.solarSystem.position = new Vector3(-35, 0, 30);
+    this.solarSystem.parent = this.coreTransformNode;
+
+    const utilLayer = new UtilityLayerRenderer(this.scene, false);
+    this.planeSolarSystem = MeshBuilder.CreatePlane("planeLabel", { width: 80, height: 40 }, utilLayer.utilityLayerScene);
+    this.planeSolarSystem.renderingGroupId = 2;
+    this.planeSolarSystem.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    this.planeSolarSystem.position = new Vector3(-80, -20, 40);
+    this.planeSolarSystem.parent = this.solarSystem;
+
+    this.planeTargetSolarSystem = Mesh.CreatePlane("planeTargetSolarSystem", 4, utilLayer.utilityLayerScene);
+    this.planeTargetSolarSystem.renderingGroupId = 2;
+    this.planeTargetSolarSystem.position = new Vector3(0, 0, 0);
+    this.planeTargetSolarSystem.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    this.planeTargetSolarSystem.parent = this.solarSystem;
   }
 
   SetNoiseTexture(texture: Texture) {

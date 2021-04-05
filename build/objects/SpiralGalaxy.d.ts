@@ -6,12 +6,13 @@ import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 export declare class SpiralGalaxy {
     name: string;
     readonly coreTransformNode: TransformNode;
-    readonly solarSystem: TransformNode;
-    localArm: AbstractMesh;
-    readonly planeSolarSystem: Mesh;
-    readonly planeTargetSolarSystem: Mesh;
+    solarSystem: TransformNode;
+    planeLocalArm: AbstractMesh;
+    planeSolarSystem: Mesh;
+    planeTargetSolarSystem: Mesh;
     private readonly scene;
     private readonly materialsForGalaxy;
     constructor(name: string, scene: MainScene);
+    AddMeshesForGUI(): void;
     SetNoiseTexture(texture: Texture): void;
 }

@@ -2,7 +2,7 @@ import { Engine } from "@babylonjs/core/Engines/engine";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { Scene, SceneOptions } from "@babylonjs/core/scene";
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
-import { GLTFFileLoader, GLTFLoaderAnimationStartMode } from "@babylonjs/loaders/glTF/index";
+import { GLTFFileLoader, GLTFLoaderAnimationStartMode } from "@babylonjs/loaders/glTF";
 import { AssetsManager } from "@babylonjs/core/Misc/assetsManager";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import "@babylonjs/core/Helpers/sceneHelpers";
@@ -53,6 +53,7 @@ export class MainScene extends Scene {
 
     const gui = new GUI("gui");
     gui.AddBackButton();
+    gui.SetVisibilityBackButton(false);
     gui.onPointerUpObservable.add((parentGalaxy: Galaxies) => {
       const invisibleGalaxies = this.galaxiesArray.filter(galaxy => galaxy.name !== parentGalaxy.name);
       invisibleGalaxies.forEach(galaxy => galaxy.coreTransformNode.setEnabled(false))
@@ -102,7 +103,7 @@ export class MainScene extends Scene {
 
     const irregularGalaxy = new IrregularGalaxy("Irregular Galaxy", this);
     this.galaxiesArray.push(irregularGalaxy);
-    irregularGalaxy.coreTransformNode.position.x += 350;
+    irregularGalaxy.coreTransformNode.position.x += 300;
     gui.AddLabel(irregularGalaxy.name, irregularGalaxy);
 
     const spiralGalaxy = new SpiralGalaxy("Spiral Galaxy", this);
@@ -113,7 +114,7 @@ export class MainScene extends Scene {
     const ellipticalGalaxy = new EllipticalGalaxy("Elliptical Galaxy", this);
     this.galaxiesArray.push(ellipticalGalaxy);
     gui.AddLabel(ellipticalGalaxy.name, ellipticalGalaxy);
-    ellipticalGalaxy.coreTransformNode.position.x -= 350;
+    ellipticalGalaxy.coreTransformNode.position.x -= 300;
     coreEllipticalGalaxyParticles.emitter = <AbstractMesh>ellipticalGalaxy.coreTransformNode;
 
     const noiseTextureTask = this.assetsManager.addTextureTask(
@@ -137,7 +138,7 @@ export class MainScene extends Scene {
         planeSolarLabel: spiralGalaxy.planeSolarSystem,
         solarSystem: spiralGalaxy.solarSystem,
         planeTargetSolarSystem: spiralGalaxy.planeTargetSolarSystem,
-        planeArmLabel: spiralGalaxy.localArm
+        planeArmLabel: spiralGalaxy.planeLocalArm
       }
       gui.AddSolarLabel(configSolarLabels);
       gui.SetSolarLabelsVisibility(false);

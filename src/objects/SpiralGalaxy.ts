@@ -8,7 +8,7 @@ import {Texture} from "@babylonjs/core/Materials/Textures/texture";
 import {GalaxyMaterial} from "./materials/GalaxyMaterial";
 import {CONFIG_SPIRAL_GALAXY_MATERIAL} from "./materials/configsGalaxiesMaterial";
 import {AbstractMesh} from "@babylonjs/core/Meshes/abstractMesh";
-import {UtilityLayerRenderer} from "@babylonjs/core/";
+import {UtilityLayerRenderer} from "@babylonjs/core/Rendering/utilityLayerRenderer";
 
 export class SpiralGalaxy {
   name: string;

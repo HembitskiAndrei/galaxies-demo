@@ -49,8 +49,8 @@ export default {
     serve({
       open: true,
       contentBase: "build",
-      host: "localhost",
-      port: 10001,
+      host: "192.168.100.6",
+      port: 10006,
       headers: {
         "Access-Control-Allow-Origin": "*",
       },

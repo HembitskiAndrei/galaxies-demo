@@ -13,6 +13,7 @@ import { EllipticalGalaxy } from "../objects/EllipticalGalaxy";
 import { Color4 } from "@babylonjs/core/Maths/math.color";
 import { CoreParticles } from "../objects/particles/coreParticles";
 import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
+import { GlowLayer } from "@babylonjs/core/Layers/glowLayer";
 import { GUI } from "../objects/gui/GUI";
 import { Galaxies } from "../types";
 
@@ -22,6 +23,7 @@ export class MainScene extends Scene {
   assetsManager: AssetsManager;
   camera: ArcRotateCamera;
   galaxiesArray: Galaxies[];
+  gl: GlowLayer;
 
   constructor(engine: Engine, canvas: HTMLCanvasElement, options?: SceneOptions) {
     super(engine, options);
@@ -49,6 +51,9 @@ export class MainScene extends Scene {
 
     CreateEnvironment(this);
 
+    this.gl = new GlowLayer("glow", this);
+    this.gl.intensity = 1.0;
+
     this.galaxiesArray = [];
 
     const gui = new GUI("gui");
@@ -56,10 +61,10 @@ export class MainScene extends Scene {
     gui.SetVisibilityBackButton(false);
     gui.onPointerUpObservable.add((parentGalaxy: Galaxies) => {
       const invisibleGalaxies = this.galaxiesArray.filter(galaxy => galaxy.name !== parentGalaxy.name);
-      invisibleGalaxies.forEach(galaxy => galaxy.coreTransformNode.setEnabled(false))
+      invisibleGalaxies.forEach(galaxy => galaxy.coreTransformNode.setEnabled(false));
 
       if (parentGalaxy.name === "Spiral Galaxy") {
-        gui.SetSolarLabelsVisibility(true);
+        // gui.SetSolarLabelsVisibility(true);
       }
 
       gui.SetVisibilityGalaxiesButton(false);
@@ -72,7 +77,7 @@ export class MainScene extends Scene {
     });
 
     gui.onBackObservable.add(() => {
-      this.galaxiesArray.forEach(galaxy => galaxy.coreTransformNode.setEnabled(true))
+      this.galaxiesArray.forEach(galaxy => galaxy.coreTransformNode.setEnabled(true));
 
       gui.SetSolarLabelsVisibility(false);
 
@@ -84,10 +89,20 @@ export class MainScene extends Scene {
       this.camera.upperRadiusLimit = 950;
     });
 
-    const coreSpiralGalaxyParticles = new CoreParticles("coreSpiralGalaxyParticles", 1, this, new Color4(0.9,0.9,0.9,0.9));
+    const coreSpiralGalaxyParticles = new CoreParticles(
+      "coreSpiralGalaxyParticles",
+      1,
+      this,
+      new Color4(0.7, 0.7, 0.7, 0.5),
+    );
     coreSpiralGalaxyParticles.start();
 
-    const coreEllipticalGalaxyParticles = new CoreParticles("coreEllipticalGalaxyParticles", 1, this, new Color4(0.5,0.5,0.5,0.5));
+    const coreEllipticalGalaxyParticles = new CoreParticles(
+      "coreEllipticalGalaxyParticles",
+      1,
+      this,
+      new Color4(0.5, 0.5, 0.5, 0.5),
+    );
     coreEllipticalGalaxyParticles.start();
 
     const lensFlareTextureTask = this.assetsManager.addTextureTask(
@@ -138,8 +153,8 @@ export class MainScene extends Scene {
         planeSolarLabel: spiralGalaxy.planeSolarSystem,
         solarSystem: spiralGalaxy.solarSystem,
         planeTargetSolarSystem: spiralGalaxy.planeTargetSolarSystem,
-        planeArmLabel: spiralGalaxy.planeLocalArm
-      }
+        planeArmLabel: spiralGalaxy.planeLocalArm,
+      };
       gui.AddSolarLabel(configSolarLabels);
       gui.SetSolarLabelsVisibility(false);
       this.registerBeforeRender(() => {

@@ -70,7 +70,7 @@ export const CONFIG_SPIRAL_GALAXY_MATERIAL = {
         vec4 emissiveColor = texture2D( emissiveSampler, uv );
         vec4 noiseColor = texture2D( noise, uv + time * 0.000075 ) * 20.0;
         vNoiseColor = noiseColor;
-        positionUpdated.y += noiseColor.r - emissiveColor.r * 0.75;
+        // positionUpdated.y += noiseColor.r - emissiveColor.r * 0.75;
       `,
   Fragment_Definitions: `
         varying vec4 vNoiseColor;

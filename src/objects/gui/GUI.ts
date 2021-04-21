@@ -31,7 +31,7 @@ export class GUI {
   SetVisibilityGalaxiesButton(value: boolean) {
     this.galaxiesButton.forEach(button => {
       button.isVisible = value;
-    })
+    });
     this.SetVisibilityBackButton(!value);
   }
 
@@ -41,7 +41,7 @@ export class GUI {
 
   AddLabel(text: string, galaxy: Galaxies) {
     const rect1 = new Rectangle();
-    this.galaxiesButton.push(rect1)
+    this.galaxiesButton.push(rect1);
     rect1.width = 0.2;
     rect1.height = "35px";
     rect1.cornerRadius = 10;
@@ -53,20 +53,20 @@ export class GUI {
     rect1.onPointerEnterObservable.add(() => {
       rect1.background = "#5c5c5c";
       rect1.color = "#ffffff";
-    })
+    });
     rect1.onPointerOutObservable.add(() => {
       rect1.background = "#454545";
       rect1.color = "#878787";
-    })
+    });
     rect1.onPointerDownObservable.add(() => {
       rect1.background = "#555572";
       rect1.color = "#ffffff";
-    })
+    });
     rect1.onPointerUpObservable.add(() => {
       rect1.background = "#5c5c5c";
       rect1.color = "#ffffff";
       this.onPointerUpObservable.notifyObservers(galaxy);
-    })
+    });
     this.advancedTexture.addControl(rect1);
     rect1.linkWithMesh(galaxy.coreTransformNode);
     rect1.linkOffsetY = 100;
@@ -80,7 +80,7 @@ export class GUI {
 
   AddSolarLabel(config: ISolarLabelsConfig) {
     this.solarSystemNode = config.solarSystem;
-    this.localArmPlane = config.planeArmLabel;
+    // this.localArmPlane = config.planeArmLabel;
     const advancedTexture = AdvancedDynamicTexture.CreateForMesh(config.planeSolarLabel, 1024, 512);
 
     const rect1 = new Rectangle();
@@ -118,30 +118,30 @@ export class GUI {
 
     this.advancedTexture.addControl(this.lineToLabel);
 
-    const advancedTextureArm = AdvancedDynamicTexture.CreateForMesh(config.planeArmLabel, 1024, 256);
-
-    const rectArm = new Rectangle();
-    rectArm.width = 1.0;
-    rectArm.height = 1.0;
-    rectArm.cornerRadius = 40;
-    rectArm.color = "#454545";
-    rectArm.thickness = 20;
-    rectArm.background = "#ffffff55";
-    advancedTextureArm.addControl(rectArm);
-    rectArm.linkWithMesh(config.solarSystem);
-    rectArm.linkOffsetY = -100;
-
-    const labelArm = new TextBlock();
-    labelArm.text = config.textArmLabel;
-    labelArm.color = "#000000";
-    labelArm.fontSize = 150;
-    rectArm.addControl(labelArm);
+    // const advancedTextureArm = AdvancedDynamicTexture.CreateForMesh(config.planeArmLabel, 1024, 256);
+    //
+    // const rectArm = new Rectangle();
+    // rectArm.width = 1.0;
+    // rectArm.height = 1.0;
+    // rectArm.cornerRadius = 40;
+    // rectArm.color = "#454545";
+    // rectArm.thickness = 20;
+    // rectArm.background = "#ffffff55";
+    // advancedTextureArm.addControl(rectArm);
+    // rectArm.linkWithMesh(config.solarSystem);
+    // rectArm.linkOffsetY = -100;
+    //
+    // const labelArm = new TextBlock();
+    // labelArm.text = config.textArmLabel;
+    // labelArm.color = "#000000";
+    // labelArm.fontSize = 150;
+    // rectArm.addControl(labelArm);
   }
 
   SetSolarLabelsVisibility(value: boolean) {
     this.lineToLabel.isVisible = value;
     this.solarSystemNode.setEnabled(value);
-    this.localArmPlane.setEnabled(value);
+    // this.localArmPlane.setEnabled(value);
   }
 
   AddBackButton() {
@@ -161,20 +161,20 @@ export class GUI {
     rectback.onPointerEnterObservable.add(() => {
       rectback.background = "#5c5c5c";
       rectback.color = "#ffffff";
-    })
+    });
     rectback.onPointerOutObservable.add(() => {
       rectback.background = "#454545";
       rectback.color = "#878787";
-    })
+    });
     rectback.onPointerDownObservable.add(() => {
       rectback.background = "#555572";
       rectback.color = "#ffffff";
-    })
+    });
     rectback.onPointerUpObservable.add(() => {
       rectback.background = "#5c5c5c";
       rectback.color = "#ffffff";
       this.onBackObservable.notifyObservers();
-    })
+    });
     this.advancedTexture.addControl(rectback);
 
     const label = new TextBlock();

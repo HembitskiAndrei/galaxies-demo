@@ -27,7 +27,9 @@ export const barTransitionAnimation = (
   const animationGroup = new AnimationGroup("animationWidthGroups");
   animationGroup.speedRatio = duration;
   animationGroup.addTargetedAnimation(animationWidth, object);
-
+  animationGroup.onAnimationGroupEndObservable.add(function () {
+    animationGroup.dispose();
+  });
   return animationGroup;
 };
 
@@ -60,6 +62,8 @@ export const barAlphaAnimation = (
   animationGroup.speedRatio = duration;
   animationGroup.addTargetedAnimation(animationAlpha, object);
   animationGroup.normalize(0, 60);
-
+  animationGroup.onAnimationGroupEndObservable.add(function () {
+    animationGroup.dispose();
+  });
   return animationGroup;
 };

@@ -6,6 +6,7 @@ declare class GUI {
     onPointerUpObservable: any;
     galaxiesButton: Rectangle[];
     activeButtonAnimation: AnimationGroup;
+    barsAlphaAnimation: AnimationGroup[];
     inactiveButtonAnimation: AnimationGroup;
     bars: Rectangle[];
     constructor(name: string);

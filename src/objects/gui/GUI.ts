@@ -17,6 +17,7 @@ class GUI {
   onPointerUpObservable: any;
   galaxiesButton: Rectangle[];
   activeButtonAnimation: AnimationGroup;
+  barsAlphaAnimation: AnimationGroup[];
   inactiveButtonAnimation: AnimationGroup;
   bars: Rectangle[];
 
@@ -25,7 +26,7 @@ class GUI {
     this.onPointerUpObservable = new Observable();
     this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI(name);
     this.advancedTexture.idealWidth = 1024;
-
+    this.barsAlphaAnimation = [];
     const container = this.CreatContainerForLines({
       width: 125,
       height: 0.6,
@@ -139,6 +140,7 @@ class GUI {
   SetBarsAnimation(index: number) {
     const delta = 0.1;
     const widthFactor = 100;
+    this.barsAlphaAnimation.forEach(animGroup => animGroup.dispose());
     this.bars.forEach((v, i) => {
       const animGroup = barTransitionAnimation(
         v,
@@ -159,6 +161,7 @@ class GUI {
         50,
       );
       animGroupAlpha.play(true);
+      this.barsAlphaAnimation.push(animGroupAlpha);
     });
   }
 }

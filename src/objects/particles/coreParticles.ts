@@ -1,10 +1,8 @@
-import { ParticleSystem, Texture } from "@babylonjs/core";
-import { MainScene } from "../../scenes/MainScene";
-import { Color4 } from "@babylonjs/core/Maths/math.color";
-import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { Color4, Vector3, ParticleSystem, Texture } from "@babylonjs/core";
+import { GalaxiesSceneType } from "../../types";
 
-export class CoreParticles extends ParticleSystem {
-  constructor(name: string, capacity: number, sceneOrEngine: MainScene, color: Color4) {
+class CoreParticles extends ParticleSystem {
+  constructor(name: string, capacity: number, sceneOrEngine: GalaxiesSceneType, color: Color4) {
     super(name, capacity, sceneOrEngine);
 
     this.emitter = Vector3.Zero();
@@ -12,8 +10,8 @@ export class CoreParticles extends ParticleSystem {
     this.color1 = color;
     this.color2 = color;
     this.colorDead = color;
-    this.preWarmCycles = 4;
-    this.preWarmStepOffset = 1;
+    this.preWarmCycles = 12;
+    this.preWarmStepOffset = 4;
 
     this.minSize = 50;
     this.maxSize = 50;
@@ -31,3 +29,5 @@ export class CoreParticles extends ParticleSystem {
     this.particleTexture = texture;
   }
 }
+
+export default CoreParticles;

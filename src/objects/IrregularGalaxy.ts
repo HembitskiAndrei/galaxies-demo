@@ -1,26 +1,23 @@
-import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
-import { MainScene } from "../scenes/MainScene";
-import { Color4 } from "@babylonjs/core/Maths/math.color";
-import { Vector3 } from "@babylonjs/core/Maths/math.vector";
-import { Texture } from "@babylonjs/core/Materials/Textures/texture";
-import { GalaxyMaterial } from "./materials/GalaxyMaterial";
-import { CONFIG_IRREGULAR_GALAXY_MATERIAL } from "./materials/configsGalaxiesMaterial";
+import { TransformNode, Mesh, PBRMaterial, Texture } from "@babylonjs/core";
+import { GalaxiesSceneType } from "../types";
+import IrregularMaterial from "./materials/IrregularMaterial";
 
-export class IrregularGalaxy {
+class IrregularGalaxy {
   name: string;
   galaxyMesh: Mesh;
   readonly coreTransformNode: TransformNode;
-  private readonly scene: MainScene;
-  private readonly materialForGalaxy: GalaxyMaterial;
+  private readonly scene: GalaxiesSceneType;
+  private readonly materialsForGalaxy: IrregularMaterial[];
 
-  constructor(name: string, scene: MainScene) {
+  constructor(name: string, scene: GalaxiesSceneType) {
     this.name = name;
     this.scene = scene;
     this.coreTransformNode = new TransformNode("coreTransformNode", this.scene);
 
-    this.materialForGalaxy = new GalaxyMaterial("IrregularGalaxyMaterial", this.scene, CONFIG_IRREGULAR_GALAXY_MATERIAL);
+    this.materialsForGalaxy = [];
+    for (let i = 0; i < 3; i++) {
+      this.materialsForGalaxy.push(new IrregularMaterial("spiralMaterial", this.scene, "./assets/shaders/irregular"));
+    }
 
     const meshTaskGalaxy = this.scene.assetsManager.addContainerTask(
       "galaxyTask",
@@ -29,29 +26,33 @@ export class IrregularGalaxy {
       "galaxy.glb",
     );
     meshTaskGalaxy.onSuccess = task => {
-      this.galaxyMesh = <Mesh>task.loadedContainer.meshes[1];
-      this.galaxyMesh.registerInstancedBuffer("color", 4);
-      this.galaxyMesh.instancedBuffers.color = new Color4(1, 1, 1, 1);
-      this.galaxyMesh.hasVertexAlpha = true;
-      this.galaxyMesh.parent = this.coreTransformNode;
-
-      const originalMat = <PBRMaterial>this.galaxyMesh.material;
-      this.materialForGalaxy.albedoTexture = originalMat.albedoTexture;
-      originalMat.albedoTexture.hasAlpha = true;
-      this.materialForGalaxy.emissiveTexture = originalMat.emissiveTexture;
-      this.galaxyMesh.material = this.materialForGalaxy;
-
-      for (let i = 0; i < 2; i++) {
-        const instanceBranch = this.galaxyMesh.createInstance(`${i}`);
-        instanceBranch.position.y -= i * 10;
-        instanceBranch.parent = this.coreTransformNode;
-        instanceBranch.scaling = new Vector3(1.0, 1.0, 1.0).scale(1 + i * 0.2);
-        instanceBranch.instancedBuffers.color = new Color4(1, 1, 1, 1 - i * 0.85);
+      const deltaY = 0;
+      const meshes = task.loadedContainer
+        .instantiateModelsToScene(name => `${name}-1`, false)
+        .rootNodes[0].getChildMeshes();
+      for (let i = 0; i < 3; i++) {
+        const galaxyMesh = meshes[i];
+        // galaxyMesh.setEnabled(false);
+        galaxyMesh.position.y += deltaY;
+        const originalMat = <PBRMaterial>galaxyMesh.material;
+        const customMaterial = this.materialsForGalaxy[i];
+        customMaterial.onBindObservable.add(() => {
+          customMaterial.setFloat("alphaFactor", 1.0);
+          // customMaterial.setFloat("speedFactor", 0.5);
+          customMaterial.setTexture("textureAlpha", originalMat.albedoTexture);
+          customMaterial.setTexture("textureSpiral", originalMat.emissiveTexture);
+        });
+        galaxyMesh.material = customMaterial;
+        galaxyMesh.parent = this.coreTransformNode;
       }
     };
   }
 
   setNoiseTexture(texture: Texture) {
-    this.materialForGalaxy.setTexture(texture);
+    this.materialsForGalaxy.forEach(material => {
+      material.setTexture("textureNoise", texture);
+    });
   }
 }
+
+export default IrregularGalaxy;

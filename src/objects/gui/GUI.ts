@@ -1,188 +1,166 @@
-import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
-import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle";
-import { Control } from "@babylonjs/gui/2D/controls/control";
-import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
-import { Ellipse } from "@babylonjs/gui/2D/controls/ellipse";
-import { MultiLine } from "@babylonjs/gui/2D/controls/multiLine";
-import { Observable } from "@babylonjs/core/Misc/observable";
-import { Galaxies } from "../../types";
-import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import { ISolarLabelsConfig } from "../../types";
-import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
+import {
+  TEXT_SHADOW_COLOR,
+  DEFAULT_COLOR_BACKGROUND,
+  HOVER_COLOR_BACKGROUND,
+  TEXT_COLOR,
+  PRESSED_COLOR_BORDER,
+  DEFAULT_BORDER_COLOR,
+} from "../../utils/constants";
+import { AdvancedDynamicTexture, Control, Rectangle, TextBlock } from "@babylonjs/gui";
+import { Observable, AnimationGroup, Vector2 } from "@babylonjs/core/";
+import { GalaxiesType, IButtonConfig, ILineConfig, ILinesContainerConfig } from "../../types";
+import buttonAnimation from "../../utils/buttonAnimation";
+import { barTransitionAnimation, barAlphaAnimation } from "../../utils/barTransitionAnimation";
 
-export class GUI {
+class GUI {
   advancedTexture: AdvancedDynamicTexture;
   onPointerUpObservable: any;
-  onBackObservable: any;
   galaxiesButton: Rectangle[];
-  backButton: Rectangle;
-  lineToLabel: MultiLine;
-  solarSystemNode: TransformNode;
-  localArmPlane: AbstractMesh;
+  activeButtonAnimation: AnimationGroup;
+  inactiveButtonAnimation: AnimationGroup;
+  bars: Rectangle[];
 
   constructor(name: string) {
     this.galaxiesButton = [];
     this.onPointerUpObservable = new Observable();
-    this.onBackObservable = new Observable();
     this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI(name);
     this.advancedTexture.idealWidth = 1024;
+
+    const container = this.CreatContainerForLines({
+      width: 125,
+      height: 0.6,
+      horizontalAlignment: Control.HORIZONTAL_ALIGNMENT_RIGHT,
+      verticalAlignment: Control.VERTICAL_ALIGNMENT_TOP,
+      left: -50,
+      top: 115,
+    });
+    const numLines = 10;
+    this.bars = Array.from({ length: numLines }, (item, index) => {
+      return this.CreateLines(
+        {
+          width: 100,
+          horizontalAlignment: Control.HORIZONTAL_ALIGNMENT_RIGHT,
+          verticalAlignment: Control.VERTICAL_ALIGNMENT_TOP,
+          left: -3,
+          top: `${1 + 11 * index}%`,
+        },
+        container,
+      );
+    });
   }
 
-  SetVisibilityGalaxiesButton(value: boolean) {
-    this.galaxiesButton.forEach(button => {
-      button.isVisible = value;
-    });
-    this.SetVisibilityBackButton(!value);
-  }
+  AddLabel(text: string, galaxy: GalaxiesType, config: IButtonConfig) {
+    const rectBackground = new Rectangle();
+    rectBackground.horizontalAlignment = config.horizontalAlignment;
+    rectBackground.verticalAlignment = config.verticalAlignment;
+    rectBackground.leftInPixels = config.left;
+    rectBackground.topInPixels = config.top;
+    this.galaxiesButton.push(rectBackground);
+    rectBackground.widthInPixels = config.width;
+    rectBackground.heightInPixels = 35;
+    rectBackground.transformCenterX = 1.0;
+    rectBackground.thickness = 0;
+    rectBackground.background = DEFAULT_COLOR_BACKGROUND;
+    rectBackground.hoverCursor = "pointer";
+    rectBackground.isPointerBlocker = true;
+    this.advancedTexture.addControl(rectBackground);
 
-  SetVisibilityBackButton(value: boolean) {
-    this.backButton.isVisible = value;
-  }
+    const textLabel = new TextBlock();
+    textLabel.leftInPixels = -10;
+    textLabel.text = text;
+    textLabel.color = TEXT_COLOR;
+    textLabel.shadowColor = TEXT_SHADOW_COLOR;
+    textLabel.shadowBlur = 15;
+    textLabel.shadowOffsetX = 0;
+    textLabel.shadowOffsetY = 0;
+    textLabel.fontSizeInPixels = 26;
+    textLabel.textHorizontalAlignment = TextBlock.HORIZONTAL_ALIGNMENT_RIGHT;
+    textLabel.textVerticalAlignment = TextBlock.VERTICAL_ALIGNMENT_CENTER;
+    rectBackground.addControl(textLabel);
 
-  AddLabel(text: string, galaxy: Galaxies) {
-    const rect1 = new Rectangle();
-    this.galaxiesButton.push(rect1);
-    rect1.width = 0.2;
-    rect1.height = "35px";
-    rect1.cornerRadius = 10;
-    rect1.color = "#878787";
-    rect1.thickness = 4;
-    rect1.background = "#454545";
-    rect1.hoverCursor = "pointer";
-    rect1.isPointerBlocker = true;
-    rect1.onPointerEnterObservable.add(() => {
-      rect1.background = "#5c5c5c";
-      rect1.color = "#ffffff";
+    rectBackground.onPointerEnterObservable.add(() => {
+      textLabel.color = HOVER_COLOR_BACKGROUND;
     });
-    rect1.onPointerOutObservable.add(() => {
-      rect1.background = "#454545";
-      rect1.color = "#878787";
+    rectBackground.onPointerOutObservable.add(() => {
+      textLabel.color = TEXT_COLOR;
     });
-    rect1.onPointerDownObservable.add(() => {
-      rect1.background = "#555572";
-      rect1.color = "#ffffff";
+    rectBackground.onPointerDownObservable.add(() => {
+      textLabel.color = PRESSED_COLOR_BORDER;
     });
-    rect1.onPointerUpObservable.add(() => {
-      rect1.background = "#5c5c5c";
-      rect1.color = "#ffffff";
+    rectBackground.onPointerUpObservable.add(() => {
+      textLabel.color = TEXT_COLOR;
       this.onPointerUpObservable.notifyObservers(galaxy);
     });
-    this.advancedTexture.addControl(rect1);
-    rect1.linkWithMesh(galaxy.coreTransformNode);
-    rect1.linkOffsetY = 100;
-
-    const label = new TextBlock();
-    label.text = text;
-    label.color = "#ffffff";
-    label.fontSize = 19;
-    rect1.addControl(label);
   }
 
-  AddSolarLabel(config: ISolarLabelsConfig) {
-    this.solarSystemNode = config.solarSystem;
-    // this.localArmPlane = config.planeArmLabel;
-    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(config.planeSolarLabel, 1024, 512);
-
-    const rect1 = new Rectangle();
-    rect1.width = 1.0;
-    rect1.height = 0.5;
-    rect1.cornerRadius = 40;
-    rect1.color = "#ffffff";
-    rect1.thickness = 20;
-    rect1.background = "#454545";
-    advancedTexture.addControl(rect1);
-    rect1.linkWithMesh(config.planeSolarLabel);
-    rect1.linkOffsetY = -100;
-
-    const label = new TextBlock();
-    label.text = config.textSolarLabel;
-    label.color = "#ffffff";
-    label.fontSize = 100;
-    rect1.addControl(label);
-
-    const targetAdvancedTexture = AdvancedDynamicTexture.CreateForMesh(config.planeTargetSolarSystem);
-    const target = new Ellipse();
-    target.width = 1.0;
-    target.height = 1.0;
-    target.color = "#454545";
-    target.thickness = 100;
-    target.background = "#ffffff";
-    targetAdvancedTexture.addControl(target);
-    target.linkWithMesh(config.solarSystem);
-
-    this.lineToLabel = new MultiLine();
-    this.lineToLabel.color = "#ffffff";
-    this.lineToLabel.lineWidth = 4;
-    this.lineToLabel.add(config.planeSolarLabel);
-    this.lineToLabel.add(config.planeTargetSolarSystem);
-
-    this.advancedTexture.addControl(this.lineToLabel);
-
-    // const advancedTextureArm = AdvancedDynamicTexture.CreateForMesh(config.planeArmLabel, 1024, 256);
-    //
-    // const rectArm = new Rectangle();
-    // rectArm.width = 1.0;
-    // rectArm.height = 1.0;
-    // rectArm.cornerRadius = 40;
-    // rectArm.color = "#454545";
-    // rectArm.thickness = 20;
-    // rectArm.background = "#ffffff55";
-    // advancedTextureArm.addControl(rectArm);
-    // rectArm.linkWithMesh(config.solarSystem);
-    // rectArm.linkOffsetY = -100;
-    //
-    // const labelArm = new TextBlock();
-    // labelArm.text = config.textArmLabel;
-    // labelArm.color = "#000000";
-    // labelArm.fontSize = 150;
-    // rectArm.addControl(labelArm);
+  CreatContainerForLines(config: ILinesContainerConfig) {
+    const rectContainer = new Rectangle();
+    rectContainer.horizontalAlignment = config.horizontalAlignment;
+    rectContainer.verticalAlignment = config.verticalAlignment;
+    rectContainer.leftInPixels = config.left;
+    rectContainer.topInPixels = config.top;
+    rectContainer.widthInPixels = config.width;
+    rectContainer.height = config.height;
+    rectContainer.transformCenterX = 1.0;
+    rectContainer.thickness = 0;
+    rectContainer.background = DEFAULT_COLOR_BACKGROUND;
+    this.advancedTexture.addControl(rectContainer);
+    return rectContainer;
   }
 
-  SetSolarLabelsVisibility(value: boolean) {
-    this.lineToLabel.isVisible = value;
-    this.solarSystemNode.setEnabled(value);
-    // this.localArmPlane.setEnabled(value);
+  CreateLines(config: ILineConfig, parent: Rectangle) {
+    const rectLine = new Rectangle();
+    rectLine.horizontalAlignment = config.horizontalAlignment;
+    rectLine.verticalAlignment = config.verticalAlignment;
+    rectLine.cornerRadius = 10;
+    rectLine.leftInPixels = config.left;
+    rectLine.top = config.top;
+    rectLine.widthInPixels = config.width;
+    rectLine.heightInPixels = 10;
+    rectLine.transformCenterX = 1.0;
+    rectLine.color = DEFAULT_BORDER_COLOR;
+    rectLine.thickness = 2;
+    rectLine.background = DEFAULT_COLOR_BACKGROUND;
+    parent.addControl(rectLine);
+    return rectLine;
   }
 
-  AddBackButton() {
-    const rectback = new Rectangle();
-    rectback.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_RIGHT;
-    rectback.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
-    rectback.left = "-40px";
-    rectback.top = "40px";
-    rectback.width = 0.1;
-    rectback.height = "35px";
-    rectback.cornerRadius = 10;
-    rectback.color = "#878787";
-    rectback.thickness = 4;
-    rectback.background = "#454545";
-    rectback.hoverCursor = "pointer";
-    rectback.isPointerBlocker = true;
-    rectback.onPointerEnterObservable.add(() => {
-      rectback.background = "#5c5c5c";
-      rectback.color = "#ffffff";
-    });
-    rectback.onPointerOutObservable.add(() => {
-      rectback.background = "#454545";
-      rectback.color = "#878787";
-    });
-    rectback.onPointerDownObservable.add(() => {
-      rectback.background = "#555572";
-      rectback.color = "#ffffff";
-    });
-    rectback.onPointerUpObservable.add(() => {
-      rectback.background = "#5c5c5c";
-      rectback.color = "#ffffff";
-      this.onBackObservable.notifyObservers();
-    });
-    this.advancedTexture.addControl(rectback);
+  SetActiveButton(index: number) {
+    this.activeButtonAnimation = buttonAnimation(this.galaxiesButton[index], new Vector2(1.0, 1.0), 1.0, 50);
+    this.activeButtonAnimation.play(false);
+  }
 
-    const label = new TextBlock();
-    label.text = "Back";
-    label.color = "#ffffff";
-    label.fontSize = 20;
-    rectback.addControl(label);
+  SetInactiveButton(index: number) {
+    this.SetBarsAnimation(index);
+    this.inactiveButtonAnimation = buttonAnimation(this.galaxiesButton[index], new Vector2(0.7, 0.7), 0.25, 50);
+    this.inactiveButtonAnimation.play(false);
+  }
 
-    this.backButton = rectback;
+  SetBarsAnimation(index: number) {
+    const delta = 0.1;
+    const widthFactor = 100;
+    this.bars.forEach((v, i) => {
+      const animGroup = barTransitionAnimation(
+        v,
+        (index === 0 ? Math.pow(delta * (this.bars.length - i + 1), 2.0) : Math.pow(delta * (i + 3), 2.0)) *
+          widthFactor,
+        (index === 0 ? Math.pow(delta * (i + 3), 2.0) : Math.pow(delta * (this.bars.length - i + 1), 2.0)) *
+          widthFactor,
+        50,
+      );
+      animGroup.play(false);
+
+      const deltaFrame = 4;
+      const animGroupAlpha = barAlphaAnimation(
+        v,
+        0.25,
+        0.5,
+        index === 0 ? deltaFrame * (this.bars.length - i + 1) : deltaFrame * (i + 1),
+        50,
+      );
+      animGroupAlpha.play(true);
+    });
   }
 }
+
+export default GUI;

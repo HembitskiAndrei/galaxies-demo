@@ -1,6 +1,4 @@
-import { ShaderMaterial } from "@babylonjs/core/Materials/shaderMaterial";
-import { Scene } from "@babylonjs/core/scene";
-import { Engine } from "@babylonjs/core/Engines/engine";
+import { ShaderMaterial, Scene, Engine } from "@babylonjs/core";
 
 class SpiralMaterial extends ShaderMaterial {
   constructor(name: string, scene: Scene, shaderPath: any, FRESNEL = false) {

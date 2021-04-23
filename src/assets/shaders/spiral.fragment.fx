@@ -33,7 +33,6 @@ void main() {
   vec4 noiseColor = texture2D( textureNoise, rotateUV(uv, -t * 0.0005));
   vec4 rotateColor = texture2D( textureSpiral, rotateUV(uv, -t * 0.0005) + noiseColor.rg) * noiseColor.r;
   vec4 rotateColor1 = texture2D( textureSpiral, rotateUV(uv, -t * 0.00075) + noiseColor.rg) * noiseColor.r;
-  vec4 rotateColor2 = texture2D( textureSpiral, rotateUV(uv, -t * 0.001) - noiseColor.rg) * rotateColor1.r;
 
   vec4 totalColor = texture2D( textureSpiral, uv - rotateColor1.rg * 0.001 );
   vec4 maskColor = texture2D( textureSpiral, uv * 0.85 - noiseColor.rg + cos(sin(t * 0.001) * 0.5) );
@@ -42,13 +41,13 @@ void main() {
   totalColor += maskColor;
   rotateColor *= totalColor;
   totalColor -= rotateColor;
-  totalColor *= (1.0-alphaColor) + 0.7;
+  totalColor *= (1.0-alphaColor) + 0.75;
 
   float fresnelTerm = 1.0;
   #ifdef FRESNEL
     vec3 viewDirectionW = normalize(vec3(cameraPosition.x, vPosition.y, cameraPosition.z) - vPosition);
     fresnelTerm = dot(viewDirectionW, vNormal);
-    vec3 normalizedCameraPosition = normalize(cameraPosition);
+    vec3 normalizedCameraPosition = normalize(cameraPosition + vPosition);
     fresnelTerm = mix(1.0, clamp(pow(fresnelTerm, 2.0), 0., 1.), length(vec2(normalizedCameraPosition.xz)));
     totalColor *= totalColor;
     totalColor *= 4.0;
@@ -56,5 +55,4 @@ void main() {
   #endif
 
   gl_FragColor = vec4(totalColor.rgb, max(totalColor.r, max(totalColor.g, totalColor.b)) * alphaFactor) * fresnelTerm;
-//  gl_FragColor = alphaColor;
 }

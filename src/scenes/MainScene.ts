@@ -11,6 +11,7 @@ import {
   Mesh,
   Layer,
 } from "@babylonjs/core";
+import { MAIN_CAMERA_LAYER, GUI_CAMERA_LAYER } from "../utils/constants";
 import { GLTFFileLoader, GLTFLoaderAnimationStartMode } from "@babylonjs/loaders/glTF";
 import { Control } from "@babylonjs/gui";
 import CreateEnvironment from "../utils/CreateEnvironment";
@@ -54,11 +55,11 @@ class MainScene extends Scene {
     this.activeCameras = [];
 
     this.camera = new GalaxyCamera("camera", 0, 0, 10, new Vector3(0, 0, 0), this, this.canvas);
-    this.camera.layerMask = 0x10000000;
+    this.camera.layerMask = MAIN_CAMERA_LAYER;
     this.activeCameras.push(this.camera);
 
     this.cameraGUI = new GalaxyCamera("cameraGUI", 0, 0, 10, new Vector3(0, 0, 0), this, this.canvas);
-    this.cameraGUI.layerMask = 0x20000000;
+    this.cameraGUI.layerMask = GUI_CAMERA_LAYER;
     this.activeCameras.push(this.cameraGUI);
 
     CreateEnvironment(this);
@@ -69,7 +70,7 @@ class MainScene extends Scene {
     this.galaxiesArray = [];
 
     const gui = new GUI("gui");
-    (gui.advancedTexture.layer as Layer).layerMask = 0x20000000;
+    (gui.advancedTexture.layer as Layer).layerMask = GUI_CAMERA_LAYER;
     gui.onPointerUpObservable.add((parentGalaxy: GalaxiesType) => {
       if (this.activeGalaxy.name !== parentGalaxy.name) {
         const invisibleGalaxies = this.galaxiesArray.filter(galaxy => galaxy.name !== parentGalaxy.name);
@@ -96,7 +97,7 @@ class MainScene extends Scene {
       this,
       new Color4(0.7, 0.7, 0.7, 0.5),
     );
-    coreSpiralGalaxyParticles.layerMask = 0x10000000;
+    coreSpiralGalaxyParticles.layerMask = MAIN_CAMERA_LAYER;
     coreSpiralGalaxyParticles.start();
 
     const lensFlareTextureTask = this.assetsManager.addTextureTask(
@@ -165,14 +166,14 @@ class MainScene extends Scene {
       this.camera,
       this,
     );
+    this.camera.detachPostProcess(this.glitchPostprocess);
 
     const rotateSpeedIrregularGalaxy = 0.00009;
     const rotateSpeedSpiralGalaxy = 0.00045;
     this.assetsManager.onFinish = () => {
-      irregularGalaxy.coreTransformNode.getChildMeshes().forEach(v => (v.layerMask = 0x10000000));
-      spiralGalaxy.coreTransformNode.getChildMeshes().forEach(v => (v.layerMask = 0x10000000));
-      this.sky.layerMask = 0x10000000;
-
+      irregularGalaxy.coreTransformNode.getChildMeshes().forEach(v => (v.layerMask = MAIN_CAMERA_LAYER));
+      spiralGalaxy.coreTransformNode.getChildMeshes().forEach(v => (v.layerMask = MAIN_CAMERA_LAYER));
+      this.sky.layerMask = MAIN_CAMERA_LAYER;
       this.registerBeforeRender(() => {
         irregularGalaxy.coreTransformNode.addRotation(0, -(rotateSpeedIrregularGalaxy * this.getAnimationRatio()), 0);
         spiralGalaxy.coreTransformNode.addRotation(0, rotateSpeedSpiralGalaxy * this.getAnimationRatio(), 0);

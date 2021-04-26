@@ -14,10 +14,11 @@ class SpiralGalaxy {
     this.coreTransformNode = new TransformNode("coreTransformNode", this.scene);
     this.coreTransformNode.addRotation(0, -Math.PI / 4, 0);
 
-    this.materialsForGalaxy = [];
-    for (let i = 0; i < 5; i++) {
-      this.materialsForGalaxy.push(new SpiralMaterial("spiralMaterial", this.scene, "./assets/shaders/spiral"));
-    }
+    const meshesCount = 5;
+    this.materialsForGalaxy = Array.from(
+      { length: meshesCount },
+      (item, index) => new SpiralMaterial(`spiralMaterial-${index}`, this.scene, "./assets/shaders/spiral"),
+    );
 
     const meshTaskGalaxy = this.scene.assetsManager.addContainerTask(
       "galaxyTask",
@@ -30,29 +31,22 @@ class SpiralGalaxy {
       const meshes = task.loadedContainer
         .instantiateModelsToScene(name => `${name}-1`, false)
         .rootNodes[0].getChildMeshes();
-      for (let i = 0; i < 5; i++) {
-        const galaxyMesh = meshes[i];
-        // galaxyMesh.setEnabled(false);
+      meshes.forEach((mesh, index) => {
+        const galaxyMesh = meshes[index];
         galaxyMesh.position.y += deltaY;
         const originalMat = <PBRMaterial>galaxyMesh.material;
-        const customMaterial = this.materialsForGalaxy[i];
+        const customMaterial = this.materialsForGalaxy[index];
         customMaterial.onBindObservable.add(() => {
           customMaterial.setTexture("textureAlpha", originalMat.albedoTexture);
           customMaterial.setTexture("textureSpiral", originalMat.emissiveTexture);
         });
         galaxyMesh.material = customMaterial;
         galaxyMesh.parent = this.coreTransformNode;
-      }
+      });
       this.scene.gl.referenceMeshToUseItsOwnMaterial(meshes[4]);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      meshes[4].material.setFloat("alphaFactor", 0.8);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      meshes[4].material.setFloat("speedFactor", -4.0);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      meshes[4].material.options.defines = ["#define FRESNEL"];
+      (meshes[4].material as SpiralMaterial).setFloat("alphaFactor", 0.8);
+      (meshes[4].material as SpiralMaterial).setFloat("speedFactor", -4.0);
+      (meshes[4].material as SpiralMaterial).options.defines = ["#define FRESNEL"];
     };
   }
 

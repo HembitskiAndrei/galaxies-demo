@@ -14,10 +14,11 @@ class IrregularGalaxy {
     this.scene = scene;
     this.coreTransformNode = new TransformNode("coreTransformNode", this.scene);
 
-    this.materialsForGalaxy = [];
-    for (let i = 0; i < 3; i++) {
-      this.materialsForGalaxy.push(new IrregularMaterial("spiralMaterial", this.scene, "./assets/shaders/irregular"));
-    }
+    const meshesCount = 3;
+    this.materialsForGalaxy = Array.from(
+      { length: meshesCount },
+      (item, index) => new IrregularMaterial(`irregularMaterial-${index}`, this.scene, "./assets/shaders/irregular"),
+    );
 
     const meshTaskGalaxy = this.scene.assetsManager.addContainerTask(
       "galaxyTask",
@@ -30,21 +31,19 @@ class IrregularGalaxy {
       const meshes = task.loadedContainer
         .instantiateModelsToScene(name => `${name}-1`, false)
         .rootNodes[0].getChildMeshes();
-      for (let i = 0; i < 3; i++) {
-        const galaxyMesh = meshes[i];
-        // galaxyMesh.setEnabled(false);
+      meshes.forEach((mesh, index) => {
+        const galaxyMesh = meshes[index];
         galaxyMesh.position.y += deltaY;
         const originalMat = <PBRMaterial>galaxyMesh.material;
-        const customMaterial = this.materialsForGalaxy[i];
+        const customMaterial = this.materialsForGalaxy[index];
         customMaterial.onBindObservable.add(() => {
           customMaterial.setFloat("alphaFactor", 1.0);
-          // customMaterial.setFloat("speedFactor", 0.5);
           customMaterial.setTexture("textureAlpha", originalMat.albedoTexture);
           customMaterial.setTexture("textureSpiral", originalMat.emissiveTexture);
         });
         galaxyMesh.material = customMaterial;
         galaxyMesh.parent = this.coreTransformNode;
-      }
+      });
     };
   }
 

@@ -8,15 +8,18 @@ import {
   AbstractMesh,
   GlowLayer,
   SceneLoader,
+  Mesh,
+  Layer,
 } from "@babylonjs/core";
 import { GLTFFileLoader, GLTFLoaderAnimationStartMode } from "@babylonjs/loaders/glTF";
 import { Control } from "@babylonjs/gui";
 import CreateEnvironment from "../utils/CreateEnvironment";
+import GlitchPostprocess from "../objects/postprocesses/GlitchPostprocess";
 import IrregularGalaxy from "../objects/IrregularGalaxy";
 import SpiralGalaxy from "../objects/SpiralGalaxy";
 import CoreParticles from "../objects/particles/coreParticles";
 import GUI from "../objects/gui/GUI";
-import { GalaxiesType } from "../types";
+import { GalaxiesType, GlitchPostprocessType } from "../types";
 import GalaxyCamera from "../objects/GalaxyCamera";
 
 class MainScene extends Scene {
@@ -24,14 +27,19 @@ class MainScene extends Scene {
   canvas: HTMLCanvasElement;
   assetsManager: AssetsManager;
   camera: GalaxyCamera;
+  sky: Mesh;
+  cameraGUI: GalaxyCamera;
   activeGalaxy: GalaxiesType;
   galaxiesArray: GalaxiesType[];
   gl: GlowLayer;
+  glitchPostprocess: GlitchPostprocessType;
 
   constructor(engine: Engine, canvas: HTMLCanvasElement, options?: SceneOptions) {
     super(engine, options);
     this.engine = engine;
     this.canvas = canvas;
+
+    this.clearColor = new Color4();
 
     SceneLoader.OnPluginActivatedObservable.add(function (plugin) {
       if (plugin.name === "gltf" && plugin instanceof GLTFFileLoader) {
@@ -43,7 +51,15 @@ class MainScene extends Scene {
 
     this.assetsManager = new AssetsManager(this);
 
-    this.camera = new GalaxyCamera("Camera", 0, 0, 10, new Vector3(0, 0, 0), this, this.canvas);
+    this.activeCameras = [];
+
+    this.camera = new GalaxyCamera("camera", 0, 0, 10, new Vector3(0, 0, 0), this, this.canvas);
+    this.camera.layerMask = 0x10000000;
+    this.activeCameras.push(this.camera);
+
+    this.cameraGUI = new GalaxyCamera("cameraGUI", 0, 0, 10, new Vector3(0, 0, 0), this, this.canvas);
+    this.cameraGUI.layerMask = 0x20000000;
+    this.activeCameras.push(this.cameraGUI);
 
     CreateEnvironment(this);
 
@@ -53,6 +69,7 @@ class MainScene extends Scene {
     this.galaxiesArray = [];
 
     const gui = new GUI("gui");
+    (gui.advancedTexture.layer as Layer).layerMask = 0x20000000;
     gui.onPointerUpObservable.add((parentGalaxy: GalaxiesType) => {
       if (this.activeGalaxy.name !== parentGalaxy.name) {
         const invisibleGalaxies = this.galaxiesArray.filter(galaxy => galaxy.name !== parentGalaxy.name);
@@ -67,6 +84,9 @@ class MainScene extends Scene {
         });
         this.activeGalaxy = parentGalaxy;
         this.camera.SetTransitionAnimation(parentGalaxy);
+        this.camera.attachPostProcess(this.glitchPostprocess);
+        this.cameraGUI.SetTransitionAnimation(parentGalaxy);
+        this.glitchPostprocess.glitchFactorAnimation.play(false);
       }
     });
 
@@ -76,6 +96,7 @@ class MainScene extends Scene {
       this,
       new Color4(0.7, 0.7, 0.7, 0.5),
     );
+    coreSpiralGalaxyParticles.layerMask = 0x10000000;
     coreSpiralGalaxyParticles.start();
 
     const lensFlareTextureTask = this.assetsManager.addTextureTask(
@@ -135,9 +156,23 @@ class MainScene extends Scene {
       irregularGalaxy.setNoiseTexture(task.texture);
     };
 
+    this.glitchPostprocess = new GlitchPostprocess(
+      "glitchPostprocess",
+      "./assets/shaders/glitch",
+      ["time", "resolution", "glitchInterval", "glitchRate", "glitchFactor"],
+      [],
+      1.0,
+      this.camera,
+      this,
+    );
+
     const rotateSpeedIrregularGalaxy = 0.00009;
     const rotateSpeedSpiralGalaxy = 0.00045;
     this.assetsManager.onFinish = () => {
+      irregularGalaxy.coreTransformNode.getChildMeshes().forEach(v => (v.layerMask = 0x10000000));
+      spiralGalaxy.coreTransformNode.getChildMeshes().forEach(v => (v.layerMask = 0x10000000));
+      this.sky.layerMask = 0x10000000;
+
       this.registerBeforeRender(() => {
         irregularGalaxy.coreTransformNode.addRotation(0, -(rotateSpeedIrregularGalaxy * this.getAnimationRatio()), 0);
         spiralGalaxy.coreTransformNode.addRotation(0, rotateSpeedSpiralGalaxy * this.getAnimationRatio(), 0);

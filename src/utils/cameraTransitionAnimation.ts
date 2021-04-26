@@ -109,7 +109,7 @@ export const cameraTransitionAnimation = (
   animationGroup.addTargetedAnimation(animationBeta, object);
   animationGroup.speedRatio = duration;
   animationGroup.normalize(0, 160);
-  animationGroup.onAnimationGroupEndObservable.add(function () {
+  animationGroup.onAnimationGroupEndObservable.add(() => {
     animationGroup.dispose();
   });
   return animationGroup;

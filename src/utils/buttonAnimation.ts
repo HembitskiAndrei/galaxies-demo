@@ -58,7 +58,7 @@ export const buttonAnimation = (object: Rectangle, targetScale: Vector2, targetA
   animationGroup.addTargetedAnimation(animationScaleX, object);
   animationGroup.addTargetedAnimation(animationScaleY, object);
   animationGroup.addTargetedAnimation(animationAlpha, object);
-  animationGroup.onAnimationGroupEndObservable.add(function () {
+  animationGroup.onAnimationGroupEndObservable.add(() => {
     animationGroup.dispose();
   });
   return animationGroup;

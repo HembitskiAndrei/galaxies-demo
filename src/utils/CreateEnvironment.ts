@@ -1,4 +1,4 @@
-import { Tools } from "@babylonjs/core";
+import { Mesh, Tools } from "@babylonjs/core";
 import { GalaxiesSceneType } from "../types";
 
 const CreateEnvironment = (scene: GalaxiesSceneType) => {
@@ -7,7 +7,7 @@ const CreateEnvironment = (scene: GalaxiesSceneType) => {
     const hdrRotation = -180;
     task.texture.rotationY = Tools.ToRadians(hdrRotation);
     scene.environmentTexture = task.texture;
-    scene.createDefaultSkybox(task.texture, true, 10000);
+    scene.sky = <Mesh>scene.createDefaultSkybox(task.texture, true, 10000);
   };
 };
 

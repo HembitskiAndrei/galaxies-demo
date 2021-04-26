@@ -26,7 +26,7 @@ export interface ILinesContainerConfig {
   horizontalAlignment: number;
   verticalAlignment: number;
   left: number;
-  top: number;
+  top: string;
 }
 
 export interface ILineConfig {

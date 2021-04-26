@@ -33,7 +33,7 @@ class GUI {
       horizontalAlignment: Control.HORIZONTAL_ALIGNMENT_RIGHT,
       verticalAlignment: Control.VERTICAL_ALIGNMENT_TOP,
       left: -50,
-      top: 115,
+      top: "23%",
     });
     const numLines = 10;
     this.bars = Array.from({ length: numLines }, (item, index) => {
@@ -99,7 +99,7 @@ class GUI {
     rectContainer.horizontalAlignment = config.horizontalAlignment;
     rectContainer.verticalAlignment = config.verticalAlignment;
     rectContainer.leftInPixels = config.left;
-    rectContainer.topInPixels = config.top;
+    rectContainer.top = config.top;
     rectContainer.widthInPixels = config.width;
     rectContainer.height = config.height;
     rectContainer.transformCenterX = 1.0;

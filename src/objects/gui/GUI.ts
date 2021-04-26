@@ -31,9 +31,9 @@ class GUI {
       width: 125,
       height: 0.6,
       horizontalAlignment: Control.HORIZONTAL_ALIGNMENT_RIGHT,
-      verticalAlignment: Control.VERTICAL_ALIGNMENT_TOP,
+      verticalAlignment: Control.VERTICAL_ALIGNMENT_CENTER,
       left: -50,
-      top: "23%",
+      top: "0",
     });
     const numLines = 10;
     this.bars = Array.from({ length: numLines }, (item, index) => {
@@ -43,7 +43,7 @@ class GUI {
           horizontalAlignment: Control.HORIZONTAL_ALIGNMENT_RIGHT,
           verticalAlignment: Control.VERTICAL_ALIGNMENT_TOP,
           left: -3,
-          top: `${1 + 11 * index}%`,
+          top: `${1 + 10.5 * index}%`,
         },
         container,
       );
@@ -140,13 +140,14 @@ class GUI {
   SetBarsAnimation(index: number) {
     const delta = 0.1;
     const widthFactor = 100;
+    const degree = 1.5;
     this.barsAlphaAnimation.forEach(animGroup => animGroup.dispose());
     this.bars.forEach((v, i) => {
       const animGroup = barTransitionAnimation(
         v,
-        (index === 0 ? Math.pow(delta * (this.bars.length - i + 1), 2.0) : Math.pow(delta * (i + 3), 2.0)) *
+        (index === 0 ? Math.pow(delta * (this.bars.length - i + 1), degree) : Math.pow(delta * (i + 2), degree)) *
           widthFactor,
-        (index === 0 ? Math.pow(delta * (i + 3), 2.0) : Math.pow(delta * (this.bars.length - i + 1), 2.0)) *
+        (index === 0 ? Math.pow(delta * (i + 2), degree) : Math.pow(delta * (this.bars.length - i + 1), degree)) *
           widthFactor,
         50,
       );
